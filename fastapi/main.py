@@ -27,7 +27,7 @@ async def load_model():
         print(f"Loading model from Hugging Face: {model_name}")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        device = 'cpu'  # Koyeb free tier is CPU-only
+        device = 'cpu'  # Render free tier is CPU-only
         model.to(device)
         model.eval()
         print("Model loaded successfully!")
@@ -70,11 +70,11 @@ def predict_category(input: TextInput):
         "probabilities": all_probs
     }
 
-# Optional root endpoint (explains GET / 200 OK)
+# Optional root endpoint
 @app.get("/")
 def read_root():
     return {"message": "FastAPI News Classifier is running"}
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))  # Dynamic port for Koyeb
+    port = int(os.getenv("PORT", 8000))  # Dynamic port for local testing
     uvicorn.run(app, host="0.0.0.0", port=port)
