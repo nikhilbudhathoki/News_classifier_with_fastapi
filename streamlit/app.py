@@ -9,7 +9,7 @@ CATEGORIES = [
 ]
 
 # Your Koyeb FastAPI public URL
-FASTAPI_URL = "https://comfortable-jodi-nikhil364-e49440d6.koyeb.app"  # Corrected with https://
+FASTAPI_URL = "https://news-classifier-with-fastapi.onrender.com"  # Corrected with https://
 
 # Function to create probability chart
 def create_probability_chart(probabilities):
