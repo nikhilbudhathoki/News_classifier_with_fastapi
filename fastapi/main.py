@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import uvicorn
+import os  # Add this import
 
 # Define categories
 CATEGORIES = [
@@ -26,7 +27,7 @@ async def load_model():
         print(f"Loading model from Hugging Face: {model_name}")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        device = 'cpu'  # Use 'cuda' if GPU available
+        device = 'cpu'  # Koyeb free tier is CPU-only
         model.to(device)
         model.eval()
         print("Model loaded successfully!")
@@ -75,4 +76,5 @@ def predict_category(input: TextInput):
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))  # Use Koyeb's PORT env var, fallback to 8000 locally
+    uvicorn.run(app, host="0.0.0.0", port=port)
