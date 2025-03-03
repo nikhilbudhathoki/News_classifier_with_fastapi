@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import uvicorn
+import os
 
 # Define categories
 CATEGORIES = [
@@ -26,7 +27,7 @@ async def load_model():
         print(f"Loading model from Hugging Face: {model_name}")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        device = 'cpu'  # Use 'cuda' if GPU available
+        device = 'cpu'  # Koyeb free tier is CPU-only
         model.to(device)
         model.eval()
         print("Model loaded successfully!")
@@ -44,7 +45,6 @@ def predict_category(input: TextInput):
     if len(input.text.strip()) < 10:
         return {"error": "Text too short, please provide longer input"}
     
-    # Tokenize input
     inputs = tokenizer(
         input.text,
         return_tensors="pt",
@@ -53,20 +53,16 @@ def predict_category(input: TextInput):
         padding="max_length",
     )
     
-    # Move inputs to device
     inputs = {k: v.to(device) for k, v in inputs.items()}
     
-    # Get predictions
     with torch.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
     
-    # Get probabilities
     probabilities = torch.nn.functional.softmax(logits, dim=1)
     predicted_class_idx = torch.argmax(probabilities, dim=1).item()
     predicted_class = CATEGORIES[predicted_class_idx]
     
-    # Convert probabilities to dictionary
     all_probs = {CATEGORIES[i]: float(prob) for i, prob in enumerate(probabilities[0].cpu().numpy())}
     
     return {
@@ -75,4 +71,5 @@ def predict_category(input: TextInput):
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))  # Koyeb sets PORT
+    uvicorn.run(app, host="0.0.0.0", port=port)
