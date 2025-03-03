@@ -70,6 +70,11 @@ def predict_category(input: TextInput):
         "probabilities": all_probs
     }
 
+# Optional root endpoint (explains 200 OK for GET /)
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI News Classifier is running"}
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))  # Koyeb sets PORT
     uvicorn.run(app, host="0.0.0.0", port=port)
