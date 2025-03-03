@@ -58,7 +58,7 @@ def main():
         else:
             with st.spinner("Classifying..."):
                 # Send request to FastAPI
-                response = requests.post("http://localhost:8000/predict", json={"text": news_text})
+                response = requests.post("comfortable-jodi-nikhil364-e49440d6.koyeb.app/", json={"text": news_text})
                 
                 if response.status_code == 200:
                     result = response.json()
