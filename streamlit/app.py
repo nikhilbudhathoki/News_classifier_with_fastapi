@@ -2,16 +2,19 @@ import streamlit as st
 import requests
 import matplotlib.pyplot as plt
 
-# Define categories (for reference)
+# Define categories
 CATEGORIES = [
     'Arts', 'Automobile', 'Bank', 'Blog', 'Business', 'Crime', 'Economy', 'Education',
     'Entertainment', 'Health', 'Politics', 'Society', 'Sports', 'Technology', 'Tourism', 'World'
 ]
 
+# Your Koyeb FastAPI public URL
+FASTAPI_URL = "https://comfortable-jodi-nikhil364-e49440d6.koyeb.app"  # Corrected with https://
+
 # Function to create probability chart
 def create_probability_chart(probabilities):
     sorted_probs = dict(sorted(probabilities.items(), key=lambda x: x[1], reverse=True))
-    categories = list(sorted_probs.keys())[:5]  # Top 5
+    categories = list(sorted_probs.keys())[:5]
     probs = list(sorted_probs.values())[:5]
     
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -32,11 +35,9 @@ def main():
     st.title("News Category Classifier")
     st.write("Enter a news article to classify it into one of the 16 categories.")
     
-    # Text input
     news_text = st.text_area("Enter news text:", height=200)
     example_button = st.button("Load Example Text")
     
-    # Example text
     example_text = """
     The European Central Bank cut interest rates on Thursday for the third time since June, 
     as the euro zone's economy continues to struggle and inflation edges closer to target. 
@@ -49,7 +50,6 @@ def main():
         st.session_state.news_text = news_text
         st.experimental_rerun()
     
-    # Classify button
     classify_button = st.button("Classify News")
     
     if news_text and classify_button:
@@ -57,8 +57,8 @@ def main():
             st.warning("Please enter a longer news text for better classification.")
         else:
             with st.spinner("Classifying..."):
-                # Send request to FastAPI
-                response = requests.post("comfortable-jodi-nikhil364-e49440d6.koyeb.app/", json={"text": news_text})
+                # Use the full URL with /predict endpoint
+                response = requests.post(f"{FASTAPI_URL}/predict", json={"text": news_text})
                 
                 if response.status_code == 200:
                     result = response.json()
@@ -68,21 +68,16 @@ def main():
                         predicted_category = result["predicted_category"]
                         probabilities = result["probabilities"]
                         
-                        # Display results
                         st.success(f"Predicted Category: **{predicted_category}**")
-                        
-                        # Top 3 categories
                         st.write("### Top 3 Categories:")
                         top3 = dict(sorted(probabilities.items(), key=lambda x: x[1], reverse=True)[:3])
                         for category, prob in top3.items():
                             st.write(f"- {category}: {prob:.2%}")
                         
-                        # Probability chart
                         st.write("### Probability Distribution:")
                         chart = create_probability_chart(probabilities)
                         st.pyplot(chart)
                         
-                        # Confidence info
                         top_prob = max(probabilities.values())
                         if top_prob > 0.80:
                             st.info("High confidence prediction ✅")
@@ -91,12 +86,11 @@ def main():
                         else:
                             st.warning("Low confidence prediction ⚠️")
                 else:
-                    st.error("Error classifying text")
+                    st.error(f"Error: {response.status_code} - {response.text}")
     
-    # Info section
     with st.expander("About this app"):
-        st.write("""
-        This app uses a FastAPI backend with a Hugging Face model to classify news articles into 16 categories.
+        st.write(f"""
+        This app uses a FastAPI backend at {FASTAPI_URL} with a Hugging Face model to classify news articles into 16 categories.
         See the full list of categories above.
         """)
 
